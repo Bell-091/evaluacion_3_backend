@@ -86,3 +86,4 @@ class CanastaArriendo:
             'total_final': int(round(total_final)),
             'cantidad_equipos': len(items)
         }
+

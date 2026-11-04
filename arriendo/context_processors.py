@@ -10,3 +10,4 @@ def canasta_counter(request):
         'canasta_total_items': total_items,
         'canasta_total_equipos': total_equipos,
     }
+

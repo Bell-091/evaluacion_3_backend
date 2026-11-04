@@ -108,3 +108,4 @@ class RegistroUsuarioForm(forms.ModelForm):
         if PerfilUsuario.objects.filter(rut=rut).exists():
             raise forms.ValidationError("Este RUT ya se encuentra registrado.")
         return rut
+
