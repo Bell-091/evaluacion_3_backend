@@ -283,3 +283,151 @@ def logout_view(request):
 @login_required
 def perfil_view(request):
     return render(request, 'arriendo/perfil.html', {'user': request.user})
+
+
+# ------------------------------------------------------------------------------
+# 9. BITÁCORA DE USO TÉCNICO Y ÉTICO DE IA (Criterio 2.1.4)
+# ------------------------------------------------------------------------------
+def bitacora_ia_view(request):
+    """
+    Ruta interactiva que expone la Bitácora de Inteligencia Artificial
+    con los prompts técnicos, respuestas obtenidas y adaptaciones críticas aplicadas.
+    """
+    casos_ia = [
+        {
+            'numero': 1,
+            'titulo': 'Arquitectura ORM y Protección de Integridad Relacional',
+            'herramienta': 'Claude 3.5 Sonnet / Antigravity',
+            'area': 'Modelado Relacional y Validaciones',
+            'criterio': 'Criterio 2.1.1 (ORM y Conexión BD)',
+            'icono': 'bi-database-fill-lock',
+            'prompt': (
+                "Actúa como un arquitecto de software Django sénior. Para una plataforma de arriendo de "
+                "maquinaria en Chile ('RentMaq Chile'), necesito modelar las entidades TipoFaena y Maquinaria. "
+                "¿Cómo debo configurar las relaciones para evitar que el borrado de una categoría borre "
+                "accidentalmente las máquinas en cascada, y qué validadores debo colocar a nivel de ORM para "
+                "impedir tarifas diarias o fianzas negativas?"
+            ),
+            'respuesta_ia': (
+                "La IA propuso vincular Maquinaria con TipoFaena mediante models.ForeignKey utilizando "
+                "on_delete=models.PROTECT, explicando que ante un intento de borrado Django eleva una excepción "
+                "ProtectedError impidiendo la eliminación física de la categoría mientras existan equipos vinculados. "
+                "Asimismo, recomendó MinValueValidator(0) directamente en los campos cuantitativos para forzar "
+                "la restricción a nivel de ORM y base de datos, no solo en formularios HTML."
+            ),
+            'adaptacion_critica': (
+                "Se acogió la recomendación de models.PROTECT. Se decidió además no eliminar registros físicamente "
+                "sino implementar un mecanismo de baja lógica mediante activo = models.BooleanField(default=True), "
+                "protegiendo la trazabilidad histórica de cotizaciones pasadas. Adicionalmente, se extendió el modelo "
+                "User nativo con PerfilUsuario (OneToOneField y señal post_save) para registrar RUT chileno, "
+                "teléfono de contacto y razón social de la empresa contratista."
+            ),
+            'codigo_destacado': (
+                "tipo_faena = models.ForeignKey(TipoFaena, on_delete=models.PROTECT, related_name='maquinarias')\n"
+                "tarifa_diaria = models.DecimalField(..., validators=[MinValueValidator(0)])\n"
+                "activo = models.BooleanField(default=True)  # Baja lógica"
+            )
+        },
+        {
+            'numero': 2,
+            'titulo': 'Optimización de Consultas ORM (Problema N+1) y Búsqueda Multi-Campo',
+            'herramienta': 'Gemini 1.5 Pro / Antigravity',
+            'area': 'Rendimiento y Filtros Q',
+            'criterio': 'Criterio 2.1.3 (Lectura y Búsqueda)',
+            'icono': 'bi-lightning-charge-fill',
+            'prompt': (
+                "En la vista de catálogo público de Django necesito listar maquinarias mostrando el nombre de su "
+                "TipoFaena asociada. ¿Cómo evito que Django realice consultas SQL repetitivas por cada máquina "
+                "(problema N+1)? Además, ¿cómo implemento un buscador con un solo campo de texto que busque "
+                "simultáneamente por código de serie, nombre del equipo, marca o especificaciones?"
+            ),
+            'respuesta_ia': (
+                "La IA explicó que al acceder a maquinaria.tipo_faena.nombre en el template, Django por defecto "
+                "hace 1 consulta para las máquinas y N consultas adicionales para sus categorías. Sugirió emplear "
+                "Maquinaria.objects.filter(activo=True).select_related('tipo_faena'), lo cual genera un INNER JOIN "
+                "en una única sentencia SQL. Para la búsqueda multi-campo, recomendó el objeto Q de django.db.models "
+                "combinando condiciones con el operador pipe (| OR)."
+            ),
+            'adaptacion_critica': (
+                "Se aplicó select_related('tipo_faena') en catalogo_view y panel_gestion_view, eliminando 100% "
+                "las consultas redundantes sobre SQLite. El buscador Q se combinó con filtros dinámicos por ID de faena, "
+                "ordenamiento configurable (precio asc/desc, nombre A-Z) y paginación con Paginator (6 equipos por página)."
+            ),
+            'codigo_destacado': (
+                "maquinarias = Maquinaria.objects.filter(activo=True).select_related('tipo_faena')\n"
+                "if query:\n"
+                "    maquinarias = maquinarias.filter(\n"
+                "        Q(nombre__icontains=query) | Q(codigo__icontains=query) |\n"
+                "        Q(marca__icontains=query) | Q(descripcion__icontains=query)\n"
+                "    )"
+            )
+        },
+        {
+            'numero': 3,
+            'titulo': 'Manejo Seguro de Sesiones HTTP (request.session) y Cálculo de IVA 19%',
+            'herramienta': 'ChatGPT (GPT-4o) / Antigravity',
+            'area': 'Sesiones HTTP y Lógica Tributaria',
+            'criterio': 'Criterio 2.1.4 (Sesiones y Cotizador)',
+            'icono': 'bi-cart-check-fill',
+            'prompt': (
+                "¿Cómo programo un cotizador de arriendo en Django usando request.session para que el cliente "
+                "acumule equipos temporalmente, modifique los días de cada uno, y calcule el IVA chileno del 19% "
+                "más fianza de garantía? ¿Cómo logro que el contador de ítems se muestre en el Navbar en todas "
+                "las páginas sin pasarlo manualmente en cada vista?"
+            ),
+            'respuesta_ia': (
+                "La IA recomendó encapsular la lógica en una clase de servicio CanastaArriendo que guarde un diccionario "
+                "en request.session['canasta_arriendo']. Enfatizó que al mutar estructuras anidadas es obligatorio "
+                "ejecutar request.session.modified = True para que Django persista los cambios en la cookie. "
+                "Para la disponibilidad global en plantillas, indicó crear un Context Processor en context_processors.py "
+                "y registrarlo en TEMPLATES['OPTIONS']['context_processors']."
+            ),
+            'adaptacion_critica': (
+                "Se implementó arriendo/cart.py (CanastaArriendo) y arriendo/context_processors.py (canasta_counter). "
+                "Se aplicó la legislación tributaria chilena: el IVA del 19% grava estrictamente el Subtotal Neto "
+                "del servicio de arriendo, mientras que la fianza de garantía se suma aparte sin IVA por ser un monto "
+                "de caución reembolsable. Al confirmar la solicitud, se genera un código formalizado (REQ-XXXXXXXX) "
+                "y se vacía la sesión."
+            ),
+            'codigo_destacado': (
+                "subtotal_neto = sum(tarifa * dias for item in canasta)\n"
+                "iva_19 = subtotal_neto * Decimal('0.19')\n"
+                "total_final = subtotal_neto + iva_19 + total_garantias\n"
+                "self.session.modified = True"
+            )
+        },
+        {
+            'numero': 4,
+            'titulo': 'Control de Acceso por Roles y Protección de Rutas Sensibles',
+            'herramienta': 'Antigravity AI Assistant',
+            'area': 'Seguridad y Control de Acceso',
+            'criterio': 'Criterio 2.1.4 (Seguridad y Roles)',
+            'icono': 'bi-shield-shaded',
+            'prompt': (
+                "¿Cómo restrinjo de forma segura en Django las operaciones CRUD y el panel de flota para que solo "
+                "usuarios autenticados con rol de Staff o Superusuario puedan acceder, impidiendo accesos no "
+                "autorizados por URL directa de usuarios comunes o anónimos?"
+            ),
+            'respuesta_ia': (
+                "La IA propuso utilizar el decorador @user_passes_test con una función predicado que valide "
+                "user.is_authenticated y (user.is_staff or user.is_superuser), complementado con @login_required "
+                "y el parámetro login_url='catalogo'. Además recordó verificar la inclusión de {% csrf_token %} "
+                "en cada formulario POST para mitigar vulnerabilidades CSRF."
+            ),
+            'adaptacion_critica': (
+                "Se implementó la función es_personal_staff(user) en views.py y se decoraron crear_maquinaria_view, "
+                "editar_maquinaria_view, eliminar_maquinaria_view y panel_gestion_view. Cualquier usuario sin "
+                "privilegios es redirigido de inmediato al catálogo público con mensaje de advertencia, protegiendo "
+                "la integridad del backoffice."
+            ),
+            'codigo_destacado': (
+                "@login_required\n"
+                "@user_passes_test(es_personal_staff, login_url='catalogo')\n"
+                "def panel_gestion_view(request):\n"
+                "    ..."
+            )
+        }
+    ]
+
+    return render(request, 'arriendo/bitacora_ia.html', {'casos_ia': casos_ia})
+

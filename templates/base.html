@@ -70,6 +70,11 @@
                             <i class="bi bi-grid-fill me-1"></i>Catálogo de Maquinarias
                         </a>
                     </li>
+                    <li class="nav-item">
+                        <a class="nav-link text-warning" href="{% url 'bitacora_ia' %}">
+                            <i class="bi bi-robot me-1"></i>Bitácora IA
+                        </a>
+                    </li>
                     {% if user.is_authenticated and user.is_staff %}
                     <li class="nav-item dropdown">
                         <a class="nav-link dropdown-toggle text-warning" href="#" role="button" data-bs-toggle="dropdown">
@@ -143,7 +148,12 @@
     <footer class="footer py-4 mt-auto">
         <div class="container text-center">
             <p class="mb-1 fw-bold text-white">RentMaq Chile SpA - Arriendo y Logística de Equipamiento Pesado</p>
-            <p class="small mb-0">Evaluación Sumativa N° 3 | Backend con Django, ORM, Sesiones y Bootstrap 5</p>
+            <p class="small text-light mb-2">Evaluación Sumativa N° 3 | Backend con Django, ORM, Sesiones y Bootstrap 5</p>
+            <div>
+                <a href="{% url 'bitacora_ia' %}" class="badge bg-warning text-dark text-decoration-none px-3 py-2">
+                    <i class="bi bi-robot me-1"></i>Ver Bitácora de Inteligencia Artificial (Criterio 2.1.4)
+                </a>
+            </div>
         </div>
     </footer>
 

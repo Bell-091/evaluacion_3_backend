@@ -174,6 +174,8 @@ Abra en su navegador web: [http://127.0.0.1:8000/](http://127.0.0.1:8000/)
 
 ## 7. Bitácora de Uso Técnico y Ético de Inteligencia Artificial (Criterio 2.1.4 - 5 pts)
 
+> **Ruta interactiva del sistema:** La plataforma cuenta con una vista web pública dedicada en [`/bitacora-ia/`](http://127.0.0.1:8000/bitacora-ia/) (`name='bitacora_ia'`) donde se despliega de forma visual y responsiva toda la bitácora con sus prompts, respuestas, adaptaciones y fragmentos de código fuente.
+
 En cumplimiento estricto con las directrices de la evaluación, a continuación se documentan 3 casos técnicos reales de asistencia con herramientas de IA (Claude / ChatGPT / Gemini) aplicadas a la arquitectura del software:
 
 ### Caso 1: Arquitectura ORM y Protección de Integridad Referencial
@@ -203,6 +205,18 @@ En cumplimiento estricto con las directrices de la evaluación, a continuación 
   > La IA recomendó crear una clase encapsuladora de sesión donde la canasta se guarde como un diccionario bajo la clave `request.session['canasta_arriendo']`. Destacó que al mutar estructuras anidadas es imperativo marcar `request.session.modified = True`. Para la inyección global en plantillas, propuso crear un *Context Processor* personalizado en `context_processors.py` y registrarlo en la lista `TEMPLATES['OPTIONS']['context_processors']` de `settings.py`.
 - **Adaptación y Justificación Crítica Aplicada**:
   > Se encapsuló toda la lógica en la clase `CanastaArriendo` (`arriendo/cart.py`) garantizando un diseño orientado a objetos limpio. Se aplicó rigurosamente la regla contable nacional: el IVA del 19% grava exclusivamente el servicio de arriendo (Subtotal Neto), mientras que la garantía/fianza es un monto de caución no gravado que se suma al total a transferir y se reembolsa al finiquitar el contrato.
+
+---
+
+### Caso 4: Control de Acceso por Roles y Protección de Rutas Sensibles
+- **Herramienta IA:** Antigravity AI Assistant
+- **Área Técnica:** Seguridad y Autorización Back End (Criterio 2.1.4)
+- **Prompt Utilizado**:
+  > *"¿Cómo restrinjo de forma segura en Django las operaciones CRUD y el panel de flota para que solo usuarios autenticados con rol de Staff o Superusuario puedan acceder, impidiendo accesos no autorizados por URL directa de usuarios comunes o anónimos?"*
+- **Respuesta Técnica de la IA**:
+  > La IA propuso utilizar el decorador `@user_passes_test` con una función predicado que valide `user.is_authenticated` y `(user.is_staff or user.is_superuser)`, complementado con `@login_required` y el parámetro `login_url='catalogo'`. Además recordó verificar la inclusión de `{% csrf_token %}` en cada formulario POST para mitigar vulnerabilidades CSRF.
+- **Adaptación y Justificación Crítica Aplicada**:
+  > Se implementó la función `es_personal_staff(user)` en `views.py` y se decoraron `crear_maquinaria_view`, `editar_maquinaria_view`, `eliminar_maquinaria_view` y `panel_gestion_view`. Cualquier usuario sin privilegios es redirigido de inmediato al catálogo público con mensaje de advertencia, protegiendo la integridad del backoffice.
 
 ---
 
@@ -271,6 +285,7 @@ evaluacion_3_backend/
 │   │   └── __init__.py
 │   ├── templates/
 │   │   └── arriendo/                    # Plantillas de la aplicación
+│   │       ├── bitacora_ia.html         # Bitácora interactiva de IA (Criterio 2.1.4)
 │   │       ├── canasta.html             # Cotizador transitorio (request.session)
 │   │       ├── catalogo.html            # Catálogo con buscador Q y paginador
 │   │       ├── comprobante.html         # Comprobante formal simulado

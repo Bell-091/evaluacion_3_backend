@@ -1,0 +1,126 @@
+{% extends 'base.html' %}
+
+{% block title %}Bitácora de Inteligencia Artificial | RentMaq Chile{% endblock %}
+
+{% block content %}
+<!-- HEADER / HERO -->
+<div class="row mb-4">
+    <div class="col-12 bg-dark text-white p-4 p-md-5 rounded-3 shadow-sm position-relative overflow-hidden">
+        <div class="row align-items-center">
+            <div class="col-lg-8">
+                <span class="badge bg-warning text-dark fw-bold px-3 py-2 mb-3 text-uppercase">
+                    <i class="bi bi-cpu-fill me-1"></i>Criterio 2.1.4 - Evaluación Sumativa N° 3
+                </span>
+                <h1 class="fw-bold mb-2">
+                    <i class="bi bi-robot text-warning me-2"></i>Bitácora de Uso Técnico y Ético de IA
+                </h1>
+                <p class="text-light mb-0 fs-5">
+                    Registro auditable de prompts, respuestas técnicas de modelos de lenguaje (LLMs) y la adaptación crítica aplicada en la arquitectura back end de <strong>RentMaq Chile</strong>.
+                </p>
+            </div>
+            <div class="col-lg-4 text-lg-end mt-4 mt-lg-0">
+                <div class="bg-secondary bg-opacity-25 p-3 rounded-3 border border-secondary text-center text-lg-end">
+                    <div class="fs-4 fw-bold text-warning">4 Casos Técnicos</div>
+                    <small class="text-light text-opacity-75">Arquitectura ORM • Consultas Q • Sesiones HTTP • Seguridad</small>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- TARJETAS DE CASOS DE IA -->
+<div class="row g-4">
+    {% for caso in casos_ia %}
+    <div class="col-12">
+        <div class="card shadow-sm border-0 overflow-hidden">
+            <!-- CABECERA DEL CASO -->
+            <div class="card-header bg-light border-bottom p-3 d-flex flex-wrap justify-content-between align-items-center gap-2">
+                <div class="d-flex align-items-center gap-2">
+                    <span class="badge bg-dark rounded-pill px-3 py-2 fs-6">Caso #{{ caso.numero }}</span>
+                    <h4 class="fw-bold mb-0 text-dark">
+                        <i class="bi {{ caso.icono }} text-warning me-1"></i>{{ caso.titulo }}
+                    </h4>
+                </div>
+                <div class="d-flex flex-wrap gap-2 align-items-center">
+                    <span class="badge bg-primary-subtle text-primary border border-primary px-3 py-2">
+                        <i class="bi bi-tools me-1"></i>{{ caso.herramienta }}
+                    </span>
+                    <span class="badge bg-secondary-subtle text-secondary border border-secondary px-3 py-2">
+                        {{ caso.area }}
+                    </span>
+                    <span class="badge bg-success-subtle text-success border border-success px-3 py-2">
+                        {{ caso.criterio }}
+                    </span>
+                </div>
+            </div>
+
+            <!-- CUERPO DEL CASO -->
+            <div class="card-body p-4">
+                <div class="row g-4">
+                    <!-- PROMPT DEL ESTUDIANTE -->
+                    <div class="col-lg-6">
+                        <div class="h-100 p-3 rounded-3 bg-light border border-2 border-primary border-opacity-25">
+                            <h6 class="fw-bold text-primary text-uppercase small mb-2 d-flex align-items-center">
+                                <i class="bi bi-chat-left-dots-fill me-2"></i>1. Prompt Técnico Formulado
+                            </h6>
+                            <p class="mb-0 text-dark fst-italic bg-white p-3 rounded border">
+                                "{{ caso.prompt }}"
+                            </p>
+                        </div>
+                    </div>
+
+                    <!-- RESPUESTA TÉCNICA DE LA IA -->
+                    <div class="col-lg-6">
+                        <div class="h-100 p-3 rounded-3 bg-light border border-2 border-warning border-opacity-50">
+                            <h6 class="fw-bold text-dark text-uppercase small mb-2 d-flex align-items-center">
+                                <i class="bi bi-lightbulb-fill text-warning me-2"></i>2. Orientación Técnica Proporcionada por la IA
+                            </h6>
+                            <p class="mb-0 text-secondary bg-white p-3 rounded border">
+                                {{ caso.respuesta_ia }}
+                            </p>
+                        </div>
+                    </div>
+
+                    <!-- ADAPTACIÓN Y JUSTIFICACIÓN CRÍTICA (RÚBRICA) -->
+                    <div class="col-12">
+                        <div class="p-3 rounded-3 bg-success bg-opacity-10 border border-success border-opacity-25">
+                            <h6 class="fw-bold text-success text-uppercase small mb-2 d-flex align-items-center">
+                                <i class="bi bi-check-circle-fill me-2"></i>3. Adaptación Crítica Aplicada y Justificación de Negocio
+                            </h6>
+                            <p class="text-dark mb-3">
+                                {{ caso.adaptacion_critica }}
+                            </p>
+
+                            <!-- CÓDIGO IMPLEMENTADO -->
+                            <div class="bg-dark text-white p-3 rounded-2 shadow-sm font-monospace small">
+                                <div class="text-muted small text-uppercase mb-1 fw-bold">
+                                    <i class="bi bi-code-slash text-warning me-1"></i>Fragmento de Implementación en Código Fuente:
+                                </div>
+                                <pre class="mb-0 text-warning" style="white-space: pre-wrap;"><code>{{ caso.codigo_destacado }}</code></pre>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    {% endfor %}
+</div>
+
+<!-- PANEL RESUMEN Y NORMAS ÉTICAS -->
+<div class="card shadow-sm border-0 mt-5 p-4 bg-white">
+    <div class="row align-items-center">
+        <div class="col-md-8">
+            <h5 class="fw-bold mb-1"><i class="bi bi-shield-check text-success me-2"></i>Declaración de Integridad y Autoría Responsable</h5>
+            <p class="text-muted small mb-0">
+                La Inteligencia Artificial se utilizó exclusivamente como asistente consultivo para comparar patrones de diseño, optimización de queries y validación de seguridad. Cada línea de código fue revisada, adaptada a la legislación chilena (IVA 19%) y testeada en el entorno local de Django.
+            </p>
+        </div>
+        <div class="col-md-4 text-md-end mt-3 mt-md-0">
+            <a href="{% url 'catalogo' %}" class="btn btn-warning fw-bold px-4 py-2 shadow-sm">
+                <i class="bi bi-arrow-left me-1"></i>Volver al Catálogo
+            </a>
+        </div>
+    </div>
+</div>
+{% endblock %}
