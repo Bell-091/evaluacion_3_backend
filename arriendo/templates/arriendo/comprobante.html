@@ -1,0 +1,91 @@
+{% extends 'base.html' %}
+
+{% block title %}Comprobante de Arriendo #{{ codigo_solicitud }}{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-lg-9">
+        <div class="card shadow border-0 p-4 p-md-5 bg-white">
+            <div class="d-flex justify-content-between align-items-start border-bottom pb-4 mb-4">
+                <div>
+                    <h2 class="fw-bold text-dark mb-1"><i class="bi bi-truck-flatbed text-warning me-2"></i>RENTMAQ CHILE</h2>
+                    <p class="text-muted small mb-0">Comprobante de Cotización y Solicitud de Reserva Transitoria</p>
+                </div>
+                <div class="text-end">
+                    <span class="badge bg-success fs-6 px-3 py-2 mb-1">Formalizada</span>
+                    <div class="fw-bold text-secondary">N° {{ codigo_solicitud }}</div>
+                </div>
+            </div>
+
+            <div class="row mb-4">
+                <div class="col-md-6 mb-3 mb-md-0">
+                    <h6 class="fw-bold text-muted text-uppercase small">Datos del Solicitante:</h6>
+                    <p class="mb-1"><strong>Nombre:</strong> {{ user.get_full_name|default:user.username }}</p>
+                    <p class="mb-1"><strong>RUT:</strong> {{ user.perfil.rut|default:"No informado" }}</p>
+                    <p class="mb-1"><strong>Empresa:</strong> {{ user.perfil.empresa|default:"Particular" }}</p>
+                    <p class="mb-0"><strong>Contacto:</strong> {{ user.email }} | {{ user.perfil.telefono|default:"N/A" }}</p>
+                </div>
+                <div class="col-md-6 text-md-end">
+                    <h6 class="fw-bold text-muted text-uppercase small">Condiciones del Servicio:</h6>
+                    <p class="mb-1"><strong>Vigencia de la Cotización:</strong> 5 días hábiles</p>
+                    <p class="mb-1"><strong>Lugar de Entrega:</strong> A coordinar con logística</p>
+                    <p class="mb-0"><strong>IVA Aplicado:</strong> 19% Ley N° 825</p>
+                </div>
+            </div>
+
+            <h5 class="fw-bold mb-3">Detalle de Maquinarias Cotizadas:</h5>
+            <div class="table-responsive mb-4">
+                <table class="table table-bordered align-middle">
+                    <thead class="table-light">
+                        <tr>
+                            <th>Código</th>
+                            <th>Descripción del Equipo</th>
+                            <th class="text-center">Tarifa Diaria</th>
+                            <th class="text-center">Plazo</th>
+                            <th class="text-end">Total Servicio</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for item in resumen.items %}
+                        <tr>
+                            <td class="fw-bold">{{ item.codigo }}</td>
+                            <td>{{ item.nombre }} ({{ item.marca }})</td>
+                            <td class="text-center">${{ item.tarifa_diaria|floatformat:"0" }} CLP</td>
+                            <td class="text-center">{{ item.dias }} día(s)</td>
+                            <td class="text-end fw-semibold">${{ item.costo_arriendo|floatformat:"0" }} CLP</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                    <tfoot class="table-light">
+                        <tr>
+                            <td colspan="4" class="text-end fw-bold">Subtotal Neto:</td>
+                            <td class="text-end fw-bold">${{ resumen.subtotal_neto|floatformat:"0" }} CLP</td>
+                        </tr>
+                        <tr>
+                            <td colspan="4" class="text-end fw-bold">IVA (19%):</td>
+                            <td class="text-end fw-bold">${{ resumen.iva_19|floatformat:"0" }} CLP</td>
+                        </tr>
+                        <tr>
+                            <td colspan="4" class="text-end fw-bold">Fianza Garantía (Reembolsable):</td>
+                            <td class="text-end fw-bold">${{ resumen.total_garantias|floatformat:"0" }} CLP</td>
+                        </tr>
+                        <tr class="table-success">
+                            <td colspan="4" class="text-end fs-5 fw-bold">TOTAL ESTIMADO FINAL:</td>
+                            <td class="text-end fs-5 fw-bold text-success">${{ resumen.total_final|floatformat:"0" }} CLP</td>
+                        </tr>
+                    </tfoot>
+                </table>
+            </div>
+
+            <div class="alert alert-info small mb-4">
+                <i class="bi bi-info-circle-fill me-2"></i>La memoria transitoria de sesión ha sido vaciada. Este comprobante puede ser impreso o guardado en formato PDF como respaldo comercial.
+            </div>
+
+            <div class="d-flex justify-content-between">
+                <a href="{% url 'catalogo' %}" class="btn btn-outline-dark"><i class="bi bi-house me-1"></i>Volver al Inicio</a>
+                <button onclick="window.print();" class="btn btn-warning fw-bold"><i class="bi bi-printer me-1"></i>Imprimir Comprobante</button>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

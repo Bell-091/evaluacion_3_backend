@@ -1,0 +1,154 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}RentMaq Chile | Arriendo de Maquinaria y Equipos de Faena{% endblock %}</title>
+    <!-- Bootstrap 5 CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Bootstrap Icons -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+    <style>
+        :root {
+            --primary-color: #f59e0b;
+            --primary-dark: #d97706;
+            --secondary-dark: #1e293b;
+        }
+        body {
+            background-color: #f8fafc;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            font-family: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+        }
+        .navbar-brand {
+            font-weight: 800;
+            letter-spacing: -0.5px;
+        }
+        .navbar-brand span {
+            color: var(--primary-color);
+        }
+        .main-content {
+            flex: 1;
+        }
+        .footer {
+            background-color: var(--secondary-dark);
+            color: #94a3b8;
+        }
+        .card-maquinaria {
+            transition: transform 0.2s ease, box-shadow 0.2s ease;
+            border: 1px solid #e2e8f0;
+        }
+        .card-maquinaria:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 10px 20px rgba(0,0,0,0.08);
+        }
+        .badge-faena {
+            background-color: #e0f2fe;
+            color: #0369a1;
+            font-weight: 600;
+        }
+    </style>
+    {% block extra_css %}{% endblock %}
+</head>
+<body>
+
+    <!-- NAVBAR RESPONSIVO CON BOOTSTRAP 5 -->
+    <nav class="navbar navbar-expand-lg navbar-dark bg-dark sticky-top shadow-sm py-3">
+        <div class="container">
+            <a class="navbar-brand text-white fs-4" href="{% url 'catalogo' %}">
+                <i class="bi bi-truck-flatbed text-warning me-2"></i>RENT<span>MAQ</span> CHILE
+            </a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarPrincipal">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+
+            <div class="collapse navbar-collapse" id="navbarPrincipal">
+                <ul class="navbar-nav me-auto mb-2 mb-lg-0">
+                    <li class="nav-item">
+                        <a class="nav-link text-light" href="{% url 'catalogo' %}">
+                            <i class="bi bi-grid-fill me-1"></i>Catálogo de Maquinarias
+                        </a>
+                    </li>
+                    {% if user.is_authenticated and user.is_staff %}
+                    <li class="nav-item dropdown">
+                        <a class="nav-link dropdown-toggle text-warning" href="#" role="button" data-bs-toggle="dropdown">
+                            <i class="bi bi-shield-lock-fill me-1"></i>Backoffice
+                        </a>
+                        <ul class="dropdown-menu">
+                            <li><a class="dropdown-item" href="{% url 'panel_gestion' %}"><i class="bi bi-table me-2"></i>Gestión de Flota</a></li>
+                            <li><a class="dropdown-item" href="{% url 'crear_maquinaria' %}"><i class="bi bi-plus-circle me-2"></i>Alta de Maquinaria</a></li>
+                            <li><hr class="dropdown-divider"></li>
+                            <li><a class="dropdown-item" href="/admin/" target="_blank"><i class="bi bi-gear-fill me-2"></i>Django Admin</a></li>
+                        </ul>
+                    </li>
+                    {% endif %}
+                </ul>
+
+                <!-- DERECHA: COTIZADOR Y USUARIO -->
+                <div class="d-flex align-items-center gap-3">
+                    <!-- BOTÓN CANASTA CON BADGE DE CONTEXT PROCESSOR -->
+                    <a href="{% url 'ver_canasta' %}" class="btn btn-outline-warning position-relative px-3">
+                        <i class="bi bi-cart3 me-1"></i>Cotizador
+                        {% if canasta_total_equipos > 0 %}
+                        <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger">
+                            {{ canasta_total_equipos }}
+                        </span>
+                        {% endif %}
+                    </a>
+
+                    {% if user.is_authenticated %}
+                    <div class="dropdown">
+                        <button class="btn btn-secondary dropdown-toggle d-flex align-items-center gap-2" type="button" data-bs-toggle="dropdown">
+                            <i class="bi bi-person-circle"></i>
+                            <span>{{ user.username }}</span>
+                        </button>
+                        <ul class="dropdown-menu dropdown-menu-end shadow">
+                            <li class="px-3 py-1 text-muted small">Rol: {{ user.perfil.get_rol_display|default:"Usuario" }}</li>
+                            <li><a class="dropdown-item" href="{% url 'perfil' %}"><i class="bi bi-person-lines-fill me-2"></i>Mi Perfil</a></li>
+                            <li><hr class="dropdown-divider"></li>
+                            <li><a class="dropdown-item text-danger" href="{% url 'logout' %}"><i class="bi bi-box-arrow-right me-2"></i>Cerrar Sesión</a></li>
+                        </ul>
+                    </div>
+                    {% else %}
+                    <a href="{% url 'login' %}" class="btn btn-outline-light">Iniciar Sesión</a>
+                    <a href="{% url 'registro' %}" class="btn btn-warning fw-bold">Registrarse</a>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <!-- MENSAJES FLASH DEL SISTEMA (DJANGO MESSAGES FRAMEWORK) -->
+    <div class="container mt-3">
+        {% if messages %}
+            {% for message in messages %}
+            <div class="alert alert-{{ message.tags|default:'info' }} alert-dismissible fade show shadow-sm" role="alert">
+                {% if message.tags == 'success' %}<i class="bi bi-check-circle-fill me-2"></i>
+                {% elif message.tags == 'error' or message.tags == 'danger' %}<i class="bi bi-exclamation-triangle-fill me-2"></i>
+                {% else %}<i class="bi bi-info-circle-fill me-2"></i>{% endif %}
+                {{ message }}
+                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Cerrar"></button>
+            </div>
+            {% endfor %}
+        {% endif %}
+    </div>
+
+    <!-- CONTENIDO PRINCIPAL DE CADA PLANTILLA -->
+    <main class="main-content container py-4">
+        {% block content %}{% endblock %}
+    </main>
+
+    <!-- FOOTER CORPORATIVO -->
+    <footer class="footer py-4 mt-auto">
+        <div class="container text-center">
+            <p class="mb-1 fw-bold text-white">RentMaq Chile SpA - Arriendo y Logística de Equipamiento Pesado</p>
+            <p class="small mb-0">Evaluación Sumativa N° 3 | Backend con Django, ORM, Sesiones y Bootstrap 5</p>
+        </div>
+    </footer>
+
+    <!-- Bootstrap 5 Bundle JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+    {% block extra_js %}{% endblock %}
+</body>
+</html>

@@ -1,0 +1,71 @@
+{% extends 'base.html' %}
+
+{% block title %}Panel de Gestión de Flota | RentMaq{% endblock %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <div>
+        <h2 class="fw-bold mb-1"><i class="bi bi-speedometer2 text-warning me-2"></i>Panel de Gestión Operativa</h2>
+        <p class="text-muted mb-0">Control de ciclo de vida, altas, modificaciones y bajas lógicas de maquinaria.</p>
+    </div>
+    <a href="{% url 'crear_maquinaria' %}" class="btn btn-warning fw-bold shadow-sm">
+        <i class="bi bi-plus-lg me-1"></i>Nueva Maquinaria
+    </a>
+</div>
+
+<div class="card shadow-sm border-0">
+    <div class="table-responsive">
+        <table class="table table-hover align-middle mb-0">
+            <thead class="table-dark">
+                <tr>
+                    <th>Código</th>
+                    <th>Equipo / Marca</th>
+                    <th>Faena Asignada</th>
+                    <th>Tarifa / Fianza</th>
+                    <th>Estado</th>
+                    <th>Vigencia</th>
+                    <th class="text-center">Acciones</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for m in maquinarias %}
+                <tr>
+                    <td class="fw-bold">{{ m.codigo }}</td>
+                    <td>
+                        <strong>{{ m.nombre }}</strong>
+                        <div class="small text-muted">{{ m.marca }} {{ m.modelo }}</div>
+                    </td>
+                    <td><span class="badge badge-faena">{{ m.tipo_faena.nombre }}</span></td>
+                    <td>
+                        <div>${{ m.tarifa_diaria|floatformat:"0" }} /día</div>
+                        <small class="text-muted">Garantía: ${{ m.garantia|floatformat:"0" }}</small>
+                    </td>
+                    <td>
+                        <span class="badge {% if m.estado == 'DISPONIBLE' %}bg-success{% elif m.estado == 'EN_FAENA' %}bg-warning text-dark{% else %}bg-danger{% endif %}">
+                            {{ m.get_estado_display }}
+                        </span>
+                    </td>
+                    <td>
+                        {% if m.activo %}
+                        <span class="badge bg-success-subtle text-success border border-success">Activo</span>
+                        {% else %}
+                        <span class="badge bg-danger-subtle text-danger border border-danger">Baja Lógica</span>
+                        {% endif %}
+                    </td>
+                    <td class="text-center">
+                        <div class="btn-group btn-group-sm">
+                            <a href="{% url 'editar_maquinaria' m.codigo %}" class="btn btn-outline-primary" title="Editar"><i class="bi bi-pencil"></i></a>
+                            <a href="{% url 'eliminar_maquinaria' m.codigo %}" class="btn btn-outline-danger" title="Dar de baja"><i class="bi bi-trash"></i></a>
+                        </div>
+                    </td>
+                </tr>
+                {% empty %}
+                <tr>
+                    <td colspan="7" class="text-center py-4 text-muted">No existen maquinarias registradas.</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+{% endblock %}

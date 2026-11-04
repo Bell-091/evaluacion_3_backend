@@ -1,0 +1,105 @@
+{% extends 'base.html' %}
+
+{% block title %}{{ titulo }} | RentMaq{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-lg-10">
+        <div class="card shadow-sm border-0">
+            <div class="card-header bg-dark text-white p-3">
+                <h4 class="mb-0 fw-bold"><i class="bi bi-pencil-square text-warning me-2"></i>{{ titulo }}</h4>
+            </div>
+            <div class="card-body p-4">
+                <form method="POST" enctype="multipart/form-data" novalidate>
+                    {% csrf_token %}
+
+                    {% if form.non_field_errors %}
+                    <div class="alert alert-danger">
+                        {% for err in form.non_field_errors %}{{ err }}{% endfor %}
+                    </div>
+                    {% endif %}
+
+                    <div class="row g-3">
+                        <div class="col-md-3">
+                            <label class="form-label fw-bold">Código de Serie *</label>
+                            {{ form.codigo }}
+                            {% if form.codigo.errors %}<div class="text-danger small mt-1">{{ form.codigo.errors.0 }}</div>{% endif %}
+                        </div>
+                        <div class="col-md-9">
+                            <label class="form-label fw-bold">Nombre del Equipo *</label>
+                            {{ form.nombre }}
+                            {% if form.nombre.errors %}<div class="text-danger small mt-1">{{ form.nombre.errors.0 }}</div>{% endif %}
+                        </div>
+
+                        <div class="col-md-4">
+                            <label class="form-label fw-bold">Marca *</label>
+                            {{ form.marca }}
+                            {% if form.marca.errors %}<div class="text-danger small mt-1">{{ form.marca.errors.0 }}</div>{% endif %}
+                        </div>
+                        <div class="col-md-4">
+                            <label class="form-label fw-bold">Modelo *</label>
+                            {{ form.modelo }}
+                            {% if form.modelo.errors %}<div class="text-danger small mt-1">{{ form.modelo.errors.0 }}</div>{% endif %}
+                        </div>
+                        <div class="col-md-4">
+                            <label class="form-label fw-bold">Tipo de Faena *</label>
+                            {{ form.tipo_faena }}
+                            {% if form.tipo_faena.errors %}<div class="text-danger small mt-1">{{ form.tipo_faena.errors.0 }}</div>{% endif %}
+                        </div>
+
+                        <div class="col-md-3">
+                            <label class="form-label fw-bold">Potencia (HP) *</label>
+                            {{ form.potencia_hp }}
+                            {% if form.potencia_hp.errors %}<div class="text-danger small mt-1">{{ form.potencia_hp.errors.0 }}</div>{% endif %}
+                        </div>
+                        <div class="col-md-3">
+                            <label class="form-label fw-bold">Tarifa Diaria (CLP) *</label>
+                            {{ form.tarifa_diaria }}
+                            {% if form.tarifa_diaria.errors %}<div class="text-danger small mt-1">{{ form.tarifa_diaria.errors.0 }}</div>{% endif %}
+                        </div>
+                        <div class="col-md-3">
+                            <label class="form-label fw-bold">Fianza Garantía (CLP) *</label>
+                            {{ form.garantia }}
+                            {% if form.garantia.errors %}<div class="text-danger small mt-1">{{ form.garantia.errors.0 }}</div>{% endif %}
+                        </div>
+                        <div class="col-md-3">
+                            <label class="form-label fw-bold">Unidades Parque *</label>
+                            {{ form.unidades_disponibles }}
+                            {% if form.unidades_disponibles.errors %}<div class="text-danger small mt-1">{{ form.unidades_disponibles.errors.0 }}</div>{% endif %}
+                        </div>
+
+                        <div class="col-md-6">
+                            <label class="form-label fw-bold">Condición Operativa *</label>
+                            {{ form.estado }}
+                            {% if form.estado.errors %}<div class="text-danger small mt-1">{{ form.estado.errors.0 }}</div>{% endif %}
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label fw-bold">Fotografía del Equipo</label>
+                            {{ form.imagen }}
+                            {% if form.imagen.errors %}<div class="text-danger small mt-1">{{ form.imagen.errors.0 }}</div>{% endif %}
+                        </div>
+
+                        <div class="col-12">
+                            <label class="form-label fw-bold">Especificaciones Técnicas *</label>
+                            {{ form.descripcion }}
+                            {% if form.descripcion.errors %}<div class="text-danger small mt-1">{{ form.descripcion.errors.0 }}</div>{% endif %}
+                        </div>
+
+                        <div class="col-12">
+                            <div class="form-check form-switch mt-2">
+                                {{ form.activo }}
+                                <label class="form-check-label fw-bold" for="{{ form.activo.id_for_label }}">Equipo Vigente en el Catálogo Público</label>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="d-flex justify-content-end gap-2 mt-4 border-top pt-3">
+                        <a href="{% url 'panel_gestion' %}" class="btn btn-outline-secondary">Cancelar</a>
+                        <button type="submit" class="btn btn-warning fw-bold px-4">Guardar Registro</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

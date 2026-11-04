@@ -1,0 +1,79 @@
+{% extends 'base.html' %}
+
+{% block title %}{{ maquinaria.nombre }} | Ficha Técnica{% endblock %}
+
+{% block content %}
+<div class="mb-3">
+    <a href="{% url 'catalogo' %}" class="text-decoration-none text-muted"><i class="bi bi-arrow-left me-1"></i>Volver al Catálogo</a>
+</div>
+
+<div class="card shadow-sm border-0 overflow-hidden">
+    <div class="row g-0">
+        <div class="col-lg-6 bg-light d-flex align-items-center justify-content-center p-4">
+            {% if maquinaria.imagen %}
+            <img src="{{ maquinaria.imagen.url }}" class="img-fluid rounded shadow-sm" style="max-height: 400px; object-fit: contain;" alt="{{ maquinaria.nombre }}">
+            {% else %}
+            <div class="text-center text-muted py-5">
+                <i class="bi bi-truck fs-1"></i>
+                <p class="mt-2">Sin imagen de ficha técnica</p>
+            </div>
+            {% endif %}
+        </div>
+        <div class="col-lg-6 p-4 p-lg-5 d-flex flex-column">
+            <div class="d-flex justify-content-between align-items-center mb-2">
+                <span class="badge bg-secondary">{{ maquinaria.codigo }}</span>
+                <span class="badge {% if maquinaria.estado == 'DISPONIBLE' %}bg-success{% else %}bg-warning text-dark{% endif %}">
+                    {{ maquinaria.get_estado_display }}
+                </span>
+            </div>
+
+            <h2 class="fw-bold mb-1">{{ maquinaria.nombre }}</h2>
+            <p class="text-muted">{{ maquinaria.marca }} {{ maquinaria.modelo }} | Faena: <strong>{{ maquinaria.tipo_faena.nombre }}</strong></p>
+
+            <div class="bg-light p-3 rounded mb-4">
+                <div class="row text-center">
+                    <div class="col-4 border-end">
+                        <small class="text-muted d-block">Potencia</small>
+                        <strong class="fs-5">{{ maquinaria.potencia_hp }} HP</strong>
+                    </div>
+                    <div class="col-4 border-end">
+                        <small class="text-muted d-block">Tarifa Diaria</small>
+                        <strong class="fs-5 text-primary">${{ maquinaria.tarifa_diaria|floatformat:"0" }}</strong>
+                    </div>
+                    <div class="col-4">
+                        <small class="text-muted d-block">Garantía Exigida</small>
+                        <strong class="fs-5 text-secondary">${{ maquinaria.garantia|floatformat:"0" }}</strong>
+                    </div>
+                </div>
+            </div>
+
+            <h5 class="fw-bold mb-2">Especificaciones de Operación:</h5>
+            <p class="text-secondary mb-4">{{ maquinaria.descripcion }}</p>
+
+            <div class="mt-auto border-top pt-4">
+                {% if maquinaria.estado == 'DISPONIBLE' %}
+                <form method="POST" action="{% url 'agregar_canasta' maquinaria.id %}" class="row g-2 align-items-center">
+                    {% csrf_token %}
+                    <div class="col-sm-5">
+                        <label class="form-label small fw-bold text-muted">Días estimados de arriendo:</label>
+                        <div class="input-group">
+                            <span class="input-group-text"><i class="bi bi-calendar-event"></i></span>
+                            <input type="number" name="dias" class="form-control" value="1" min="1" max="90" required>
+                        </div>
+                    </div>
+                    <div class="col-sm-7 pt-sm-4">
+                        <button type="submit" class="btn btn-warning w-100 fw-bold py-2">
+                            <i class="bi bi-cart-plus me-1"></i>Añadir a Cotización
+                        </button>
+                    </div>
+                </form>
+                {% else %}
+                <div class="alert alert-warning mb-0">
+                    <i class="bi bi-info-circle me-2"></i>Este equipo no admite nuevas solicitudes por encontrarse en condición <strong>{{ maquinaria.get_estado_display }}</strong>.
+                </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

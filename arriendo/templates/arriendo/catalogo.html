@@ -1,0 +1,148 @@
+{% extends 'base.html' %}
+
+{% block title %}Catálogo de Maquinarias | RentMaq Chile{% endblock %}
+
+{% block content %}
+<div class="row mb-4">
+    <div class="col-12 bg-dark text-white p-4 rounded-3 shadow-sm mb-4">
+        <div class="row align-items-center">
+            <div class="col-lg-8">
+                <h1 class="fw-bold mb-2"><i class="bi bi-gear-wide-connected text-warning me-2"></i>Flota Disponible para Faenas</h1>
+                <p class="text-light mb-0">Explore nuestra selección de equipos certificados para minería, obras civiles y movimiento de tierra.</p>
+            </div>
+            <div class="col-lg-4 text-lg-end mt-3 mt-lg-0">
+                <span class="badge bg-warning text-dark fs-6 px-3 py-2">Entrega Inmediata en Obra</span>
+            </div>
+        </div>
+    </div>
+
+    <!-- BARRA DE BÚSQUEDA Y FILTROS -->
+    <div class="col-12 mb-4">
+        <form method="GET" action="{% url 'catalogo' %}" class="row g-2 align-items-center bg-white p-3 rounded shadow-sm border">
+            <div class="col-md-5">
+                <div class="input-group">
+                    <span class="input-group-text bg-light"><i class="bi bi-search"></i></span>
+                    <input type="text" name="q" class="form-control" placeholder="Buscar por código, modelo, marca o descripción..." value="{{ query }}">
+                </div>
+            </div>
+            <div class="col-md-3">
+                <select name="faena" class="form-select">
+                    <option value="">Todas las Faenas Operativas</option>
+                    {% for f in faenas %}
+                    <option value="{{ f.id }}" {% if faena_seleccionada == f.id|stringformat:"s" %}selected{% endif %}>{{ f.nombre }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div class="col-md-2">
+                <select name="orden" class="form-select">
+                    <option value="reciente" {% if orden == 'reciente' %}selected{% endif %}>Más Recientes</option>
+                    <option value="precio_asc" {% if orden == 'precio_asc' %}selected{% endif %}>Precio: Menor a Mayor</option>
+                    <option value="precio_desc" {% if orden == 'precio_desc' %}selected{% endif %}>Precio: Mayor a Menor</option>
+                    <option value="nombre" {% if orden == 'nombre' %}selected{% endif %}>Nombre A-Z</option>
+                </select>
+            </div>
+            <div class="col-md-2 d-flex gap-2">
+                <button type="submit" class="btn btn-warning w-100 fw-bold">Filtrar</button>
+                {% if query or faena_seleccionada or orden != 'reciente' %}
+                <a href="{% url 'catalogo' %}" class="btn btn-outline-secondary" title="Limpiar Filtros"><i class="bi bi-x-circle"></i></a>
+                {% endif %}
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- TARJETAS DE MAQUINARIA (BOOTSTRAP CARDS) -->
+<div class="row g-4">
+    {% for maq in page_obj %}
+    <div class="col-md-6 col-lg-4">
+        <div class="card h-100 card-maquinaria shadow-sm">
+            <div style="height: 220px; overflow: hidden; background-color: #f1f5f9;" class="position-relative d-flex align-items-center justify-content-center">
+                {% if maq.imagen %}
+                <img src="{{ maq.imagen.url }}" class="card-img-top h-100 w-100" style="object-fit: cover;" alt="{{ maq.nombre }}">
+                {% else %}
+                <div class="text-center text-muted p-4">
+                    <i class="bi bi-truck fs-1"></i>
+                    <p class="small mb-0 mt-1">Sin fotografía registrada</p>
+                </div>
+                {% endif %}
+                <span class="position-absolute top-0 start-0 m-2 badge bg-dark text-white fw-bold">
+                    {{ maq.codigo }}
+                </span>
+                <span class="position-absolute top-0 end-0 m-2 badge {% if maq.estado == 'DISPONIBLE' %}bg-success{% elif maq.estado == 'EN_FAENA' %}bg-warning text-dark{% else %}bg-danger{% endif %}">
+                    {{ maq.get_estado_display }}
+                </span>
+            </div>
+
+            <div class="card-body d-flex flex-column">
+                <div class="mb-2">
+                    <span class="badge badge-faena">{{ maq.tipo_faena.nombre }}</span>
+                </div>
+                <h5 class="card-title fw-bold text-dark mb-1">{{ maq.nombre }}</h5>
+                <p class="text-muted small mb-2"><i class="bi bi-tag-fill me-1"></i>{{ maq.marca }} {{ maq.modelo }} | <i class="bi bi-lightning-charge-fill text-warning"></i>{{ maq.potencia_hp }} HP</p>
+                <p class="card-text text-secondary small flex-grow-1">{{ maq.descripcion|truncatewords:18 }}</p>
+
+                <div class="border-top pt-3 mt-2">
+                    <div class="d-flex justify-content-between align-items-baseline mb-3">
+                        <span class="text-muted small">Tarifa diaria:</span>
+                        <span class="fs-5 fw-bold text-primary">${{ maq.tarifa_diaria|floatformat:"0" }} CLP <small class="text-muted fw-normal">/día</small></span>
+                    </div>
+
+                    <div class="d-flex gap-2">
+                        <a href="{% url 'detalle_maquinaria' maq.codigo %}" class="btn btn-outline-dark btn-sm flex-grow-1">
+                            <i class="bi bi-eye me-1"></i>Ver Ficha
+                        </a>
+                        {% if maq.estado == 'DISPONIBLE' %}
+                        <form method="POST" action="{% url 'agregar_canasta' maq.id %}">
+                            {% csrf_token %}
+                            <input type="hidden" name="dias" value="1">
+                            <button type="submit" class="btn btn-warning btn-sm fw-bold">
+                                <i class="bi bi-cart-plus me-1"></i>Cotizar
+                            </button>
+                        </form>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    {% empty %}
+    <div class="col-12 py-5 text-center bg-white rounded border">
+        <i class="bi bi-exclamation-circle text-muted fs-1 mb-3"></i>
+        <h4>No se encontraron maquinarias con los criterios seleccionados</h4>
+        <p class="text-muted">Intente modificar los términos de búsqueda o limpiar los filtros.</p>
+        <a href="{% url 'catalogo' %}" class="btn btn-warning fw-bold mt-2">Ver Catálogo Completo</a>
+    </div>
+    {% endfor %}
+</div>
+
+<!-- PAGINACIÓN CON DJANGO PAGINATOR -->
+{% if page_obj.has_other_pages %}
+<nav class="mt-5" aria-label="Paginador de maquinarias">
+    <ul class="pagination justify-content-center">
+        {% if page_obj.has_previous %}
+        <li class="page-item">
+            <a class="page-link" href="?page=1{% if query %}&q={{ query }}{% endif %}{% if faena_seleccionada %}&faena={{ faena_seleccionada }}{% endif %}{% if orden %}&orden={{ orden }}{% endif %}">&laquo; Primera</a>
+        </li>
+        <li class="page-item">
+            <a class="page-link" href="?page={{ page_obj.previous_page_number }}{% if query %}&q={{ query }}{% endif %}{% if faena_seleccionada %}&faena={{ faena_seleccionada }}{% endif %}{% if orden %}&orden={{ orden }}{% endif %}">Anterior</a>
+        </li>
+        {% endif %}
+
+        <li class="page-item active">
+            <span class="page-link bg-warning border-warning text-dark fw-bold">
+                Página {{ page_obj.number }} de {{ page_obj.paginator.num_pages }}
+            </span>
+        </li>
+
+        {% if page_obj.has_next %}
+        <li class="page-item">
+            <a class="page-link" href="?page={{ page_obj.next_page_number }}{% if query %}&q={{ query }}{% endif %}{% if faena_seleccionada %}&faena={{ faena_seleccionada }}{% endif %}{% if orden %}&orden={{ orden }}{% endif %}">Siguiente</a>
+        </li>
+        <li class="page-item">
+            <a class="page-link" href="?page={{ page_obj.paginator.num_pages }}{% if query %}&q={{ query }}{% endif %}{% if faena_seleccionada %}&faena={{ faena_seleccionada }}{% endif %}{% if orden %}&orden={{ orden }}{% endif %}">Última &raquo;</a>
+        </li>
+        {% endif %}
+    </ul>
+</nav>
+{% endif %}
+{% endblock %}

@@ -1,0 +1,108 @@
+{% extends 'base.html' %}
+
+{% block title %}Cotizador de Arriendo | RentMaq Chile{% endblock %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h2 class="fw-bold mb-0"><i class="bi bi-calculator text-warning me-2"></i>Cotizador y Canasta de Arriendo</h2>
+    {% if resumen.items %}
+    <a href="{% url 'vaciar_canasta' %}" class="btn btn-outline-danger btn-sm" onclick="return confirm('¿Está seguro de vaciar la cotización?');">
+        <i class="bi bi-trash3 me-1"></i>Vaciar Cotizador
+    </a>
+    {% endif %}
+</div>
+
+{% if resumen.items %}
+<div class="row g-4">
+    <!-- TABLA DE EQUIPOS -->
+    <div class="col-lg-8">
+        <div class="card shadow-sm border-0">
+            <div class="table-responsive">
+                <table class="table align-middle mb-0">
+                    <thead class="table-light">
+                        <tr>
+                            <th>Equipo</th>
+                            <th class="text-center">Tarifa/Día</th>
+                            <th class="text-center" style="width: 140px;">Días</th>
+                            <th class="text-end">Costo Arriendo</th>
+                            <th class="text-center">Acción</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for item in resumen.items %}
+                        <tr>
+                            <td>
+                                <strong class="d-block">{{ item.nombre }}</strong>
+                                <small class="text-muted">Cód: {{ item.codigo }} | Marca: {{ item.marca }}</small>
+                                <div class="small text-secondary">Fianza: ${{ item.garantia|floatformat:"0" }}</div>
+                            </td>
+                            <td class="text-center">${{ item.tarifa_diaria|floatformat:"0" }}</td>
+                            <td class="text-center">
+                                <form method="POST" action="{% url 'actualizar_canasta' item.id %}" class="d-flex gap-1 justify-content-center">
+                                    {% csrf_token %}
+                                    <input type="number" name="dias" value="{{ item.dias }}" min="1" max="90" class="form-control form-control-sm text-center" style="width: 70px;">
+                                    <button type="submit" class="btn btn-sm btn-outline-secondary" title="Actualizar días"><i class="bi bi-arrow-repeat"></i></button>
+                                </form>
+                            </td>
+                            <td class="text-end fw-bold">${{ item.costo_arriendo|floatformat:"0" }} CLP</td>
+                            <td class="text-center">
+                                <a href="{% url 'eliminar_de_canasta' item.id %}" class="text-danger" title="Eliminar ítem">
+                                    <i class="bi bi-x-circle fs-5"></i>
+                                </a>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <!-- TARJETA DE TOTALES FINANCIEROS Y LIQUIDACIÓN -->
+    <div class="col-lg-4">
+        <div class="card shadow-sm border-0 bg-white p-4">
+            <h5 class="fw-bold mb-3 border-bottom pb-2">Desglose de Cotización</h5>
+            
+            <div class="d-flex justify-content-between mb-2">
+                <span class="text-muted">Subtotal Neto (Servicios):</span>
+                <span class="fw-semibold">${{ resumen.subtotal_neto|floatformat:"0" }} CLP</span>
+            </div>
+
+            <div class="d-flex justify-content-between mb-2">
+                <span class="text-muted">IVA Legal (19%):</span>
+                <span class="fw-semibold">${{ resumen.iva_19|floatformat:"0" }} CLP</span>
+            </div>
+
+            <div class="d-flex justify-content-between mb-3">
+                <span class="text-muted">Fianza Garantías (Reembolsable):</span>
+                <span class="fw-semibold text-secondary">${{ resumen.total_garantias|floatformat:"0" }} CLP</span>
+            </div>
+
+            <div class="border-top pt-3 mb-4">
+                <div class="d-flex justify-content-between align-items-baseline">
+                    <span class="fs-5 fw-bold">Total Estimado:</span>
+                    <span class="fs-4 fw-bold text-success">${{ resumen.total_final|floatformat:"0" }} CLP</span>
+                </div>
+                <small class="text-muted d-block mt-1">* La fianza de garantía se reintegra al finalizar la faena en conformidad.</small>
+            </div>
+
+            <a href="{% url 'confirmar_cotizacion' %}" class="btn btn-warning w-100 fw-bold py-2 mb-2 shadow-sm">
+                <i class="bi bi-file-earmark-check me-1"></i>Generar Solicitud de Arriendo
+            </a>
+            <a href="{% url 'catalogo' %}" class="btn btn-outline-dark w-100">
+                <i class="bi bi-plus-circle me-1"></i>Seguir Cotizando Equipos
+            </a>
+        </div>
+    </div>
+</div>
+{% else %}
+<div class="text-center py-5 bg-white rounded border shadow-sm">
+    <i class="bi bi-cart-x text-muted fs-1 mb-3"></i>
+    <h3>Tu canasta de arriendo se encuentra vacía</h3>
+    <p class="text-muted">Aún no has añadido maquinaria ni equipos a tu estimación de costos.</p>
+    <a href="{% url 'catalogo' %}" class="btn btn-warning fw-bold px-4 py-2 mt-2">
+        <i class="bi bi-grid-fill me-1"></i>Explorar Catálogo
+    </a>
+</div>
+{% endif %}
+{% endblock %}

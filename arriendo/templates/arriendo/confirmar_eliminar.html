@@ -1,0 +1,31 @@
+{% extends 'base.html' %}
+
+{% block title %}Confirmar Baja de Maquinaria{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-md-6">
+        <div class="card shadow border-0 text-center p-4">
+            <div class="text-warning mb-3">
+                <i class="bi bi-exclamation-triangle-fill display-3"></i>
+            </div>
+            <h3 class="fw-bold">¿Confirmar Baja de Equipo?</h3>
+            <p class="text-muted">
+                Está a punto de desactivar del catálogo operativo el equipo:<br>
+                <strong class="text-dark fs-5">[{{ maquinaria.codigo }}] {{ maquinaria.nombre }}</strong>
+            </p>
+            <div class="alert alert-secondary small text-start">
+                <i class="bi bi-shield-check me-1"></i><strong>Nota de Seguridad:</strong> Se aplicará una <em>baja lógica</em> (<code>activo = False</code>). El registro no será destruido físicamente de la base de datos para no alterar cotizaciones o estadísticas históricas.
+            </div>
+
+            <form method="POST">
+                {% csrf_token %}
+                <div class="d-flex justify-content-center gap-3 mt-3">
+                    <a href="{% url 'panel_gestion' %}" class="btn btn-outline-secondary px-4">Cancelar</a>
+                    <button type="submit" class="btn btn-danger fw-bold px-4">Confirmar Desactivación</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}
