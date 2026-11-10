@@ -13,7 +13,7 @@
 | :--- | :--- |
 | **Nombre de la Organización o Plataforma** | **RentMaq Chile SpA** |
 | **Modelo de Negocio / Giro** | Plataforma B2B/B2C de arriendo y cotización de maquinaria pesada, liviana y equipos para faenas de construcción, minería y obras civiles. |
-| **Integrantes del Equipo** | `[Estudiante  Reinaldo opazo  - 20.641.314-k]` \| 
+| **Integrantes del Equipo** | `[  Reinaldo opazo  - 20.641.314-k]` \| 
 | **Entidad de Contexto / Agrupación (ORM)** | `TipoFaena` (Clasificación operativa: Movimiento de Tierra, Elevación y Carga, Obras Civiles, Pavimentación) |
 | **Entidad Principal Gestionable (ORM)** | `Maquinaria` (Equipos con código único alfanumérico, marca, potencia HP, tarifa diaria, fianza, estado operativo, soporte multimedia y baja lógica) |
 | **Propósito de la Sesión (`request.session`)** | **Canasta de Arriendo & Cotizador por Días:** Acumulación transitoria sin persistencia prematura en base de datos, con validación de disponibilidad operativa, modificación reactiva de plazos, cálculo tributario de IVA legal chileno (19%), fianza de garantía acumulada y emisión de comprobante formal con vaciado de sesión. |
